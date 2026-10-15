@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <meta name="description" content="Procvič si chemické značky prvků s kočkou Kiki.">
+  <title>Chemické značky s kočkou</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --green: #10b981;
+      --green-dark: #087f5b;
+      --green-pale: #d1fae5;
+      --blue-pale: #e0f2fe;
+      --ink: #193b37;
+      --muted: #637a76;
+      --red: #e11d48;
+      --shadow: 0 12px 32px #1c5a4b1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: max(14px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 8% 8%, var(--green-pale), transparent 24rem),
+        radial-gradient(ellipse at 95% 35%, var(--blue-pale), transparent 28rem),
+        #f5fbf8;
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+    }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    .app { width: min(100%, 720px); margin: 0 auto; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 2px 0 16px;
+      font-size: clamp(1.1rem, 4vw, 1.45rem);
+      font-weight: 900;
+      letter-spacing: -.035em;
+    }
+    .logo { width: 48px; height: 48px; flex: 0 0 auto; }
+    .screen {
+      padding: clamp(20px, 5vw, 38px);
+      border: 1px solid #10b98122;
+      border-radius: 28px;
+      background: #ffffffef;
+      box-shadow: var(--shadow);
+      text-align: center;
+      animation: arrive .3s ease both;
+    }
+    .screen[hidden], [hidden] { display: none !important; }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 8px; font-size: clamp(1.65rem, 6vw, 2.4rem); line-height: 1.1; }
+    .lead { max-width: 38rem; margin: 0 auto 18px; color: var(--muted); font-size: 1.04rem; line-height: 1.55; }
+    .welcome-cat { display: block; width: min(220px, 62vw); height: 205px; margin: 0 auto 8px; }
+    .section-label { margin: 22px 0 10px; font-weight: 850; }
+    .difficulty-options { display: grid; gap: 10px; }
+    .difficulty-choice {
+      display: grid;
+      gap: 5px;
+      min-height: 82px;
+      padding: 13px 16px;
+      border: 2px solid #d9eee5;
+      border-radius: 18px;
+      color: var(--ink);
+      background: #fff;
+      text-align: left;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s, background .15s;
+    }
+    .difficulty-choice:hover { transform: translateY(-2px); border-color: #6ee7b7; }
+    .difficulty-choice[aria-pressed="true"] { border-color: var(--green); background: #ecfdf5; box-shadow: 0 0 0 3px var(--green-pale); }
+    .difficulty-name { font-weight: 850; }
+    .difficulty-description { color: var(--muted); font-size: .88rem; line-height: 1.35; }
+    .difficulty-count { color: var(--green-dark); font-size: .8rem; font-weight: 800; }
+    .count-options { display: flex; justify-content: center; gap: 10px; }
+    .choice {
+      min-width: 76px;
+      min-height: 56px;
+      padding: 12px 18px;
+      border: 2px solid #d9eee5;
+      border-radius: 18px;
+      color: var(--ink);
+      background: #fff;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s, background .15s;
+    }
+    .choice:hover { transform: translateY(-2px); border-color: #6ee7b7; }
+    .choice[aria-pressed="true"] { border-color: var(--green); background: #ecfdf5; box-shadow: 0 0 0 3px var(--green-pale); }
+    .primary {
+      width: 100%;
+      min-height: 58px;
+      margin-top: 24px;
+      padding: 14px 20px;
+      border: 0;
+      border-radius: 18px;
+      color: white;
+      background: var(--green);
+      box-shadow: 0 7px 0 #079669;
+      font-size: 1.05rem;
+      font-weight: 900;
+      letter-spacing: .035em;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .12s, background .12s;
+    }
+    .primary:hover { background: #0dab78; }
+    .primary:active { transform: translateY(4px); box-shadow: 0 3px 0 #079669; }
+    .progress-wrap { margin-bottom: 22px; }
+    .round { margin: 0 0 9px; color: var(--muted); font-weight: 800; }
+    .progress { height: 12px; overflow: hidden; border-radius: 99px; background: #e8f2ee; }
+    .progress-fill { width: 0; height: 100%; border-radius: inherit; background: var(--green); transition: width .3s; }
+    .problem-card {
+      margin: 0 0 20px;
+      padding: clamp(28px, 9vw, 48px) 16px;
+      border: 2px solid #d8f0e5;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #f0fdf7, #eff8ff);
+    }
+    .prompt-label { margin: 0 0 10px; color: var(--muted); font-size: .95rem; font-weight: 750; }
+    .element-name { margin: 0; overflow-wrap: anywhere; font-size: clamp(2.2rem, 12vw, 4rem); font-weight: 950; letter-spacing: -.045em; }
+    .answer-field { display: grid; gap: 8px; max-width: 250px; margin: 0 auto; color: var(--muted); font-size: .95rem; font-weight: 750; text-align: left; }
+    .answer-field input {
+      width: 100%;
+      min-height: 68px;
+      padding: 10px 14px;
+      border: 2px solid #cfe8dd;
+      border-radius: 18px;
+      outline: none;
+      color: var(--ink);
+      background: #fff;
+      font-size: 2rem;
+      font-weight: 900;
+      text-align: center;
+      text-transform: capitalize;
+    }
+    .answer-field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-pale); }
+    .error { min-height: 1.5em; margin: 10px 0 -8px; color: #be123c; font-weight: 750; }
+    .feedback { margin-top: 22px; padding: 18px; border-radius: 22px; background: #fffdf6; }
+    .feedback-cat, .final-cat { display: block; width: min(200px, 60vw); height: 190px; margin: 0 auto; }
+    .feedback-title { margin: 4px 0 8px; font-size: 1.8rem; font-weight: 950; }
+    .good { color: var(--green-dark); }
+    .bad { color: var(--red); }
+    .solution { margin: 0; line-height: 1.6; }
+    .final-title { margin-bottom: 10px; }
+    .score { margin: 8px 0; font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 950; }
+    .encouragement { color: var(--muted); font-size: 1.08rem; line-height: 1.5; }
+    .result-wrap { position: relative; }
+    .music-note { position: absolute; z-index: 1; color: #f59e0b; font-size: 1.8rem; pointer-events: none; animation: float-note 2s ease-in-out infinite; }
+    .music-note.one { top: 12%; left: 12%; }
+    .music-note.two { top: 28%; right: 10%; animation-delay: .6s; }
+    .music-note.three { bottom: 30%; left: 9%; animation-delay: 1s; }
+    .dancing { animation: dance .7s ease-in-out infinite alternate; transform-origin: 50% 90%; }
+    .dancing .arm { transform-box: fill-box; transform-origin: center; animation: wave .36s ease-in-out infinite alternate; }
+    .dancing .ear { transform-box: fill-box; transform-origin: bottom center; animation: ear-flap .45s ease-in-out infinite alternate; }
+    #confetti { position: fixed; inset: 0; z-index: 10; width: 100%; height: 100%; pointer-events: none; }
+    .footer-note { margin: 16px 0 0; color: #76908a; font-size: .82rem; text-align: center; }
+    :focus-visible { outline: 3px solid #0ea5e9; outline-offset: 3px; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes dance { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-14px) rotate(4deg); } }
+    @keyframes wave { from { transform: rotate(-15deg); } to { transform: rotate(35deg); } }
+    @keyframes ear-flap { from { transform: rotate(-8deg); } to { transform: rotate(12deg); } }
+    @keyframes float-note { 50% { transform: translateY(-12px) rotate(12deg); } }
+    @media (min-width: 620px) {
+      .difficulty-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .difficulty-choice { align-content: start; min-height: 150px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div class="app">
+    <header class="topbar">
+      <svg class="logo" viewBox="0 0 120 120" role="img" aria-label="Kočka">
+        <path d="M20 48 18 11l35 25q7-2 14 0l35-25-2 37q8 12 8 27a48 42 0 0 1-96 0q0-15 8-27z" fill="#d1d5db"/>
+        <path d="m26 39-2-18 22 16zM94 37l22-16-2 18-20-2z" fill="#fbcfe8"/>
+        <ellipse cx="44" cy="66" rx="5" ry="7" fill="#243b53"/><ellipse cx="76" cy="66" rx="5" ry="7" fill="#243b53"/>
+        <path d="m55 78 5-4 5 4-5 4z" fill="#fb7185"/>
+        <path d="M60 82q-6 8-12 2m12-2q6 8 12 2M44 79l-15-3m15 8-16 2m48-7 15-3m-15 8 16 2" fill="none" stroke="#34495e" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="34" cy="78" r="6" fill="#fda4af"/><circle cx="86" cy="78" r="6" fill="#fda4af"/>
+      </svg>
+      <span>Chemické značky s kočkou</span>
+    </header>
+
+    <main>
+      <section class="screen" id="setup-screen" aria-labelledby="welcome-title">
+        <svg class="welcome-cat" viewBox="0 0 240 220" role="img" aria-label="Veselá kočka zve k procvičování">
+          <ellipse cx="120" cy="204" rx="68" ry="10" fill="#dff3e9"/>
+          <path d="M77 142q-6 22-5 52h96q1-31-7-52z" fill="#10b981"/>
+          <ellipse cx="120" cy="181" rx="23" ry="18" fill="#9ca3af"/>
+          <path d="M66 73 58 15q32 12 48 47zM174 73l8-58q-32 12-48 47z" fill="#aeb8c2"/>
+          <path d="m70 58-5-29q20 11 29 28zM170 58l5-29q-20 11-29 28z" fill="#fbcfe8"/>
+          <ellipse cx="120" cy="91" rx="66" ry="62" fill="#d1d5db"/>
+          <path d="M92 83q9-13 18 0M131 83q9-13 18 0" fill="none" stroke="#34495e" stroke-width="5" stroke-linecap="round"/>
+          <path d="m114 103 6-5 6 5-6 5z" fill="#fb7185"/>
+          <path d="M120 108q-12 14-23 3m23-3q12 14 23 3M89 104l-22-5m22 12-23 2m75-9 22-5m-22 12 23 2" fill="none" stroke="#34495e" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="80" cy="112" r="9" fill="#fda4af" opacity=".75"/><circle cx="160" cy="112" r="9" fill="#fda4af" opacity=".75"/>
+          <path d="M81 151q-28-19-38-3l24 28M159 151q28-19 38-3l-24 28" fill="#aeb8c2" stroke="#98a4ae" stroke-width="3" stroke-linecap="round"/>
+          <path d="M92 195v10m56-10v10" stroke="#34495e" stroke-width="8" stroke-linecap="round"/>
+          <path d="M34 33l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z" fill="#fbbf24"/>
+          <path d="M204 36l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z" fill="#6ee7b7"/>
+        </svg>
+        <h1 id="welcome-title">Ahoj, objevitelé!</h1>
+        <p class="lead">Já jsem Kiki. Poznáš český název prvku? Napiš jeho chemickou značku!</p>
+        <p class="section-label">Vyber si obtížnost</p>
+        <div class="difficulty-options" id="difficulty-options" role="group" aria-label="Obtížnost">
+          <button class="difficulty-choice" type="button" data-tier="basic" aria-pressed="true">
+            <span class="difficulty-name">Základní</span>
+            <span class="difficulty-description">Známé prvky z běžného života a prvních školních lekcí.</span>
+            <span class="difficulty-count" id="basic-count"></span>
+          </button>
+          <button class="difficulty-choice" type="button" data-tier="advanced" aria-pressed="false">
+            <span class="difficulty-name">Pokročilé</span>
+            <span class="difficulty-description">Další často probírané kovy, nekovy i vzácné plyny.</span>
+            <span class="difficulty-count" id="advanced-count"></span>
+          </button>
+          <button class="difficulty-choice" type="button" data-tier="master" aria-pressed="false">
+            <span class="difficulty-name">Mistr</span>
+            <span class="difficulty-description">Méně známé, vzácné, radioaktivní a uměle připravené prvky.</span>
+            <span class="difficulty-count" id="master-count"></span>
+          </button>
+        </div>
+        <p class="section-label">Kolik prvků si procvičíme?</p>
+        <div class="count-options" id="count-options" role="group" aria-label="Počet prvků v sérii">
+          <button class="choice" type="button" data-count="5" aria-pressed="true">5</button>
+          <button class="choice" type="button" data-count="10" aria-pressed="false">10</button>
+          <button class="choice" type="button" data-count="15" aria-pressed="false">15</button>
+        </div>
+        <button class="primary" id="start-button" type="button">SPUSTIT HRU</button>
+      </section>
+
+      <section class="screen" id="game-screen" aria-labelledby="round-label" hidden>
+        <div class="progress-wrap">
+          <p class="round" id="round-label" aria-live="polite">Kolo: 1 / 5</p>
+          <div class="progress" role="progressbar" aria-label="Postup hrou" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+        <div class="problem-card">
+          <p class="prompt-label">Jaká je chemická značka prvku?</p>
+          <p class="element-name" id="element-name"></p>
+        </div>
+        <form id="answer-form" novalidate>
+          <label class="answer-field">Chemická značka
+            <input id="answer-input" name="symbol" type="text" inputmode="text" maxlength="3" autocomplete="off" autocapitalize="characters" spellcheck="false" required aria-label="Zadej chemickou značku">
+          </label>
+          <p class="error" id="answer-error" aria-live="polite"></p>
+          <button class="primary" type="submit">ZKONTROLOVAT</button>
+        </form>
+        <div class="feedback" id="feedback" aria-live="polite" hidden>
+          <div id="feedback-cat"></div>
+          <p class="feedback-title" id="feedback-title"></p>
+          <p class="solution" id="solution"></p>
+          <button class="primary" id="next-button" type="button">DALŠÍ PRVEK ➔</button>
+        </div>
+      </section>
+
+      <section class="screen" id="result-screen" aria-labelledby="result-title" hidden>
+        <div class="result-wrap">
+          <div id="result-decoration"></div>
+          <div id="result-cat"></div>
+        </div>
+        <h1 class="final-title" id="result-title"></h1>
+        <p class="score" id="result-score"></p>
+        <p class="encouragement" id="result-message"></p>
+        <button class="primary" id="again-button" type="button">HRÁT ZNOVU</button>
+      </section>
+    </main>
+    <p class="footer-note">Procvičujeme značky všech 118 chemických prvků. 🐱</p>
+  </div>
+
+  <script>
+    "use strict";
+    (() => {
+      const elements = [
+        ["Vodík", "H"], ["Helium", "He"], ["Lithium", "Li"], ["Beryllium", "Be"],
+        ["Bor", "B"], ["Uhlík", "C"], ["Dusík", "N"], ["Kyslík", "O"],
+        ["Fluor", "F"], ["Neon", "Ne"], ["Sodík", "Na"], ["Hořčík", "Mg"],
+        ["Hliník", "Al"], ["Křemík", "Si"], ["Fosfor", "P"], ["Síra", "S"],
+        ["Chlor", "Cl"], ["Argon", "Ar"], ["Draslík", "K"], ["Vápník", "Ca"],
+        ["Skandium", "Sc"], ["Titan", "Ti"], ["Vanad", "V"], ["Chrom", "Cr"],
+        ["Mangan", "Mn"], ["Železo", "Fe"], ["Kobalt", "Co"], ["Nikl", "Ni"],
+        ["Měď", "Cu"], ["Zinek", "Zn"], ["Gallium", "Ga"], ["Germanium", "Ge"],
+        ["Arsen", "As"], ["Selen", "Se"], ["Brom", "Br"], ["Krypton", "Kr"],
+        ["Rubidium", "Rb"], ["Stroncium", "Sr"], ["Yttrium", "Y"], ["Zirkonium", "Zr"],
+        ["Niob", "Nb"], ["Molybden", "Mo"], ["Technecium", "Tc"], ["Ruthenium", "Ru"],
+        ["Rhodium", "Rh"], ["Palladium", "Pd"], ["Stříbro", "Ag"], ["Kadmium", "Cd"],
+        ["Indium", "In"], ["Cín", "Sn"], ["Antimon", "Sb"], ["Tellur", "Te"],
+        ["Jod", "I"], ["Xenon", "Xe"], ["Cesium", "Cs"], ["Barium", "Ba"],
+        ["Lanthan", "La"], ["Cer", "Ce"], ["Praseodym", "Pr"], ["Neodym", "Nd"],
+        ["Promethium", "Pm"], ["Samarium", "Sm"], ["Europium", "Eu"], ["Gadolinium", "Gd"],
+        ["Terbium", "Tb"], ["Dysprosium", "Dy"], ["Holmium", "Ho"], ["Erbium", "Er"],
+        ["Thulium", "Tm"], ["Ytterbium", "Yb"], ["Lutecium", "Lu"], ["Hafnium", "Hf"],
+        ["Tantal", "Ta"], ["Wolfram", "W"], ["Rhenium", "Re"], ["Osmium", "Os"],
+        ["Iridium", "Ir"], ["Platina", "Pt"], ["Zlato", "Au"], ["Rtuť", "Hg"],
+        ["Thallium", "Tl"], ["Olovo", "Pb"], ["Bismut", "Bi"], ["Polonium", "Po"],
+        ["Astat", "At"], ["Radon", "Rn"], ["Francium", "Fr"], ["Radium", "Ra"],
+        ["Aktinium", "Ac"], ["Thorium", "Th"], ["Protaktinium", "Pa"], ["Uran", "U"],
+        ["Neptunium", "Np"], ["Plutonium", "Pu"], ["Americium", "Am"], ["Curium", "Cm"],
+        ["Berkelium", "Bk"], ["Kalifornium", "Cf"], ["Einsteinium", "Es"], ["Fermium", "Fm"],
+        ["Mendelevium", "Md"], ["Nobelium", "No"], ["Lawrencium", "Lr"], ["Rutherfordium", "Rf"],
+        ["Dubnium", "Db"], ["Seaborgium", "Sg"], ["Bohrium", "Bh"], ["Hassium", "Hs"],
+        ["Meitnerium", "Mt"], ["Darmstadtium", "Ds"], ["Roentgenium", "Rg"], ["Copernicium", "Cn"],
+        ["Nihonium", "Nh"], ["Flerovium", "Fl"], ["Moscovium", "Mc"], ["Livermorium", "Lv"],
+        ["Tennessin", "Ts"], ["Oganesson", "Og"]
+      ];
+      const tierSymbols = {
+        basic: new Set("H He Li C N O F Ne Na Mg Al Si P S Cl Ar K Ca Fe Cu Zn Ag Sn I Au Hg Pb".split(" ")),
+        advanced: new Set("Be B Sc Ti V Cr Mn Co Ni Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Cd In Sb Te Xe Cs Ba Pt Tl Bi Po At Rn Ra Th U Pu".split(" "))
+      };
+      const classifiedSymbols = new Set([...tierSymbols.basic, ...tierSymbols.advanced]);
+      const knownSymbols = new Set(elements.map(([, symbol]) => symbol));
+      if (classifiedSymbols.size !== tierSymbols.basic.size + tierSymbols.advanced.size ||
+          [...classifiedSymbols].some((symbol) => !knownSymbols.has(symbol)) ||
+          elements.some(([, symbol]) => !/^[A-Z][a-z]?$/.test(symbol)) ||
+          elements.length !== 118 ||
+          new Set(elements.map(([, symbol]) => symbol)).size !== elements.length) {
+        throw new Error("Seznam chemických prvků nebo rozdělení obtížností není platné.");
+      }
+      const tierElements = {
+        basic: elements.filter(([, symbol]) => tierSymbols.basic.has(symbol)),
+        advanced: elements.filter(([, symbol]) => tierSymbols.advanced.has(symbol)),
+        master: elements.filter(([, symbol]) => !classifiedSymbols.has(symbol))
+      };
+      if (Object.values(tierElements).some((group) => group.length === 0) ||
+          Object.values(tierElements).reduce((sum, group) => sum + group.length, 0) !== elements.length) {
+        throw new Error("Obtížnosti musí dohromady obsahovat všech 118 prvků.");
+      }
+      const state = { total: 5, difficulty: "basic", round: 0, score: 0, attempts: 0, questions: [], confettiFrame: 0 };
+      const byId = (id) => document.getElementById(id);
+      const setupScreen = byId("setup-screen");
+      const gameScreen = byId("game-screen");
+      const resultScreen = byId("result-screen");
+      const form = byId("answer-form");
+      const answerInput = byId("answer-input");
+      const answerError = byId("answer-error");
+      const feedback = byId("feedback");
+      const progress = document.querySelector(".progress");
+      const progressFill = byId("progress-fill");
+      const canvas = byId("confetti");
+      const context = canvas.getContext("2d");
+      for (const tier of Object.keys(tierElements)) {
+        byId(`${tier}-count`).textContent = `${tierElements[tier].length} prvků`;
+      }
+
+      function makeCat(mood, dancing = false) {
+        const happy = mood === "happy";
+        const sad = mood === "sad";
+        const face = happy
+          ? '<path d="M102 116q18 20 36 0" fill="none" stroke="#34495e" stroke-width="5" stroke-linecap="round"/>'
+          : sad
+            ? '<path d="M103 130q17-18 34 0" fill="none" stroke="#34495e" stroke-width="5" stroke-linecap="round"/>'
+            : '<path d="M105 122q15 9 30 0" fill="none" stroke="#34495e" stroke-width="4" stroke-linecap="round"/>';
+        const arms = happy
+          ? '<path class="arm" d="M66 151Q34 131 32 98l-3-20q-1-11 7-11t9 10l4 15q6-8 13-2l20 25M174 151q33-21 34-53l3-20q1-11-7-11t-9 10l-4 15q-6-8-13-2l-20 25"/>'
+          : sad
+            ? '<path class="arm" d="M66 151Q48 163 41 148l-8-22q-4-10 4-13t12 7l7 13 24-2M174 151q18 12 25-3l8-22q4-10-4-13t-12 7l-7 13-24-2"/>'
+            : '<path d="M67 153q-25-5-28-26M173 153q25-5 28-26"/>';
+        const thumb = happy
+          ? '<path d="M31 70v-17q0-8 7-8t7 8v15" fill="#f5c8a8" stroke="#34495e" stroke-width="3" stroke-linejoin="round"/>'
+          : sad ? '<path d="M37 112l-8 14" stroke="#34495e" stroke-width="4" stroke-linecap="round"/>' : "";
+        return `<svg class="${dancing ? "final-cat dancing" : "feedback-cat"}" viewBox="0 0 240 220" role="img" aria-label="${happy ? "Veselá kočka s palcem nahoru" : sad ? "Smutná kočka s palcem dolů" : "Kočka"}">
+          <ellipse cx="120" cy="207" rx="62" ry="9" fill="#dff3e9"/>
+          <g fill="#aeb8c2" stroke="#8c9aa5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${arms}</g>${thumb}
+          <path d="M79 150q-5 19-4 50h90q1-30-6-50z" fill="#10b981"/>
+          <ellipse cx="120" cy="181" rx="22" ry="18" fill="#9ca3af"/>
+          <g class="ear"><path d="M66 66 58 18q27 9 42 39z" fill="#aeb8c2"/><path d="m70 51-5-24q17 9 25 23z" fill="#fbcfe8"/></g>
+          <g class="ear"><path d="m174 66 8-48q-27 9-42 39z" fill="#aeb8c2"/><path d="m170 51 5-24q-17 9-25 23z" fill="#fbcfe8"/></g>
+          <ellipse cx="120" cy="92" rx="65" ry="63" fill="#d1d5db"/>
+          ${sad ? '<ellipse cx="92" cy="94" rx="5" ry="8" fill="#34495e"/><ellipse cx="148" cy="94" rx="5" ry="8" fill="#34495e"/>' : '<circle cx="94" cy="93" r="5" fill="#34495e"/><circle cx="146" cy="93" r="5" fill="#34495e"/>'}
+          <path d="m114 105 6-5 6 5-6 5z" fill="#fb7185"/>${face}
+          <path d="M120 110q-11 12-22 3m22-3q11 12 22 3M94 109l-23-5m23 12-24 2m69-9 23-5m-23 12 24 2" fill="none" stroke="#34495e" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="79" cy="116" r="7" fill="#fda4af" opacity=".75"/><circle cx="161" cy="116" r="7" fill="#fda4af" opacity=".75"/>
+          ${sad ? '<path d="M89 105q6 9 12 0" fill="none" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>' : ""}
+          <path d="M97 198v9m46-9v9" stroke="#34495e" stroke-width="8" stroke-linecap="round"/>
+        </svg>`;
+      }
+
+      function updateProgress() {
+        byId("round-label").textContent = `Kolo: ${state.round + 1} / ${state.total}`;
+        progress.setAttribute("aria-valuemax", String(state.total));
+        progress.setAttribute("aria-valuenow", String(state.round));
+        progressFill.style.width = `${state.round / state.total * 100}%`;
+      }
+
+      function renderQuestion() {
+        const element = state.questions[state.round];
+        byId("element-name").textContent = element[0];
+        updateProgress();
+        form.hidden = false;
+        feedback.hidden = true;
+        byId("next-button").hidden = true;
+        answerError.textContent = "";
+        state.attempts = 0;
+        answerInput.value = "";
+        answerInput.focus({ preventScroll: true });
+      }
+
+      function startGame() {
+        state.round = 0;
+        state.score = 0;
+        const shuffled = [...tierElements[state.difficulty]];
+        for (let index = shuffled.length - 1; index > 0; index--) {
+          const other = Math.floor(Math.random() * (index + 1));
+          [shuffled[index], shuffled[other]] = [shuffled[other], shuffled[index]];
+        }
+        state.questions = shuffled.slice(0, state.total);
+        setupScreen.hidden = true;
+        resultScreen.hidden = true;
+        gameScreen.hidden = false;
+        renderQuestion();
+      }
+
+      function showResults() {
+        gameScreen.hidden = true;
+        resultScreen.hidden = false;
+        const percentage = Math.round(state.score / state.total * 100);
+        const passed = percentage >= 70;
+        byId("result-decoration").innerHTML = passed
+          ? '<span class="music-note one" aria-hidden="true">♫</span><span class="music-note two" aria-hidden="true">♪</span><span class="music-note three" aria-hidden="true">♫</span>'
+          : "";
+        byId("result-cat").innerHTML = makeCat(passed ? "happy" : "sad", passed);
+        byId("result-title").textContent = passed ? "Výborně! Kočka tančí! 🐱💃" : "Nevadí, zkusíme to znovu!";
+        byId("result-score").textContent = `Skóre: ${state.score} z ${state.total} · ${percentage} %`;
+        byId("result-message").textContent = passed
+          ? "Paráda! Značky prvků ti jdou skvěle. Kiki z tebe má radost!"
+          : "Každý prvek, který si zapamatuješ, se počítá. Zkusíš si další kolo?";
+        if (passed) showConfetti();
+        byId("again-button").focus({ preventScroll: true });
+      }
+
+      function showConfetti() {
+        const colors = ["#10b981", "#38bdf8", "#fbbf24", "#fb7185", "#a78bfa"];
+        const pieces = Array.from({ length: 110 }, () => ({
+          x: Math.random() * window.innerWidth,
+          y: -20 - Math.random() * window.innerHeight * .35,
+          vx: (Math.random() - .5) * 4,
+          vy: 2 + Math.random() * 4,
+          size: 4 + Math.random() * 7,
+          angle: Math.random() * Math.PI,
+          spin: (Math.random() - .5) * .15,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        }));
+        cancelAnimationFrame(state.confettiFrame);
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = Math.round(window.innerWidth * ratio);
+        canvas.height = Math.round(window.innerHeight * ratio);
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        function draw() {
+          context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+          let remaining = false;
+          for (const piece of pieces) {
+            if (piece.y >= window.innerHeight + 30) continue;
+            remaining = true;
+            piece.x += piece.vx;
+            piece.y += piece.vy;
+            piece.angle += piece.spin;
+            context.save();
+            context.translate(piece.x, piece.y);
+            context.rotate(piece.angle);
+            context.fillStyle = piece.color;
+            context.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size * .65);
+            context.restore();
+          }
+          if (remaining) state.confettiFrame = requestAnimationFrame(draw);
+          else context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        }
+        state.confettiFrame = requestAnimationFrame(draw);
+      }
+
+      byId("count-options").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-count]");
+        if (!button) return;
+        state.total = Number(button.dataset.count);
+        for (const option of byId("count-options").querySelectorAll("button")) {
+          option.setAttribute("aria-pressed", String(option === button));
+        }
+      });
+
+      byId("difficulty-options").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-tier]");
+        if (!button) return;
+        state.difficulty = button.dataset.tier;
+        for (const option of byId("difficulty-options").querySelectorAll("button")) {
+          option.setAttribute("aria-pressed", String(option === button));
+        }
+      });
+
+      byId("start-button").addEventListener("click", startGame);
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const answer = answerInput.value.trim();
+        if (!/^[a-zA-Z]{1,2}$/.test(answer)) {
+          answerError.textContent = "Zadej značku z jednoho nebo dvou písmen, například H nebo Na.";
+          answerInput.focus();
+          return;
+        }
+
+        const element = state.questions[state.round];
+        const correct = answer.toLowerCase() === element[1].toLowerCase();
+        state.attempts++;
+        feedback.hidden = false;
+        byId("feedback-cat").innerHTML = makeCat(correct ? "happy" : "sad");
+        const title = byId("feedback-title");
+        title.textContent = correct
+          ? "Výborně!"
+          : state.attempts === 1 ? "Aha, vedle! Zkus to ještě jednou." : "To nevadí, tady je správná značka.";
+        title.className = `feedback-title ${correct ? "good" : "bad"}`;
+        const finished = correct || state.attempts === 2;
+        byId("solution").textContent = correct
+          ? `Správně! Značka prvku ${element[0]} je ${element[1]}.`
+          : finished
+            ? `Značka prvku ${element[0]} je ${element[1]}. Nezapomeň: první písmeno je velké.`
+            : "Každý se někdy splete. Zkus zadat značku ještě jednou!";
+        if (finished) {
+          form.hidden = true;
+          byId("next-button").hidden = false;
+          byId("next-button").focus({ preventScroll: true });
+        } else {
+          answerInput.value = "";
+          answerInput.focus({ preventScroll: true });
+        }
+        if (correct) {
+          state.score++;
+          showConfetti();
+        }
+      });
+
+      byId("next-button").addEventListener("click", () => {
+        state.round++;
+        if (state.round >= state.total) showResults();
+        else renderQuestion();
+      });
+
+      byId("again-button").addEventListener("click", () => {
+        resultScreen.hidden = true;
+        setupScreen.hidden = false;
+        byId("start-button").focus({ preventScroll: true });
+      });
+
+      window.addEventListener("resize", () => {
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = Math.round(window.innerWidth * ratio);
+        canvas.height = Math.round(window.innerHeight * ratio);
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      });
+    })();
+  </script>
+</body>
+</html>
