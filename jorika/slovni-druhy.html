@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <meta name="description" content="Zábavné procvičování deseti slovních druhů pro páťáky.">
+  <title>Slovní druhy s kočkou Kiki</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --green: #10b981;
+      --green-dark: #087f5b;
+      --green-pale: #d1fae5;
+      --blue-pale: #e0f2fe;
+      --ink: #193b37;
+      --muted: #637a76;
+      --red: #e11d48;
+      --shadow: 0 12px 32px #1c5a4b1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: max(14px, env(safe-area-inset-top)) 14px max(20px, env(safe-area-inset-bottom));
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 8% 8%, var(--green-pale), transparent 24rem),
+        radial-gradient(ellipse at 95% 35%, var(--blue-pale), transparent 28rem),
+        #f5fbf8;
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+    }
+    button { font: inherit; -webkit-tap-highlight-color: transparent; }
+    .app { width: min(100%, 850px); margin: 0 auto; }
+    .topbar { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 2px 0 16px; font-size: clamp(1.1rem, 4vw, 1.45rem); font-weight: 900; letter-spacing: -.035em; }
+    .logo { width: 46px; height: 46px; flex: 0 0 auto; }
+    .screen { padding: clamp(18px, 4vw, 34px); border: 1px solid #10b98122; border-radius: 26px; background: #ffffffef; box-shadow: var(--shadow); text-align: center; animation: arrive .3s ease both; }
+    .screen[hidden], [hidden] { display: none !important; }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 8px; font-size: clamp(1.65rem, 6vw, 2.4rem); line-height: 1.1; }
+    .lead { max-width: 42rem; margin: 0 auto 18px; color: var(--muted); font-size: 1.02rem; line-height: 1.55; }
+    .cat { display: block; width: 140px; height: 120px; margin: 0 auto 6px; }
+    .section-label { margin: 22px 0 10px; font-weight: 850; }
+    .count-options { display: flex; justify-content: center; gap: 10px; }
+    .option {
+      min-height: 54px; padding: 11px 18px; border: 2px solid #d9eee5; border-radius: 16px;
+      color: var(--ink); background: #fff; font-weight: 800; cursor: pointer;
+      transition: transform .15s, border-color .15s, background .15s;
+    }
+    .option:hover { transform: translateY(-2px); border-color: #6ee7b7; }
+    .option[aria-pressed="true"] { border-color: var(--green); background: #ecfdf5; box-shadow: 0 0 0 3px var(--green-pale); }
+    .primary {
+      width: 100%; min-height: 56px; margin-top: 22px; padding: 13px 18px; border: 0;
+      border-radius: 17px; color: white; background: var(--green); box-shadow: 0 6px 0 #079669;
+      font-size: 1rem; font-weight: 900; letter-spacing: .025em; cursor: pointer;
+      transition: transform .12s, box-shadow .12s, background .12s;
+    }
+    .primary:hover { background: #0dab78; }
+    .primary:active { transform: translateY(4px); box-shadow: 0 2px 0 #079669; }
+    .round { margin: 0 0 9px; color: var(--muted); font-weight: 800; }
+    .progress { height: 11px; margin-bottom: 22px; overflow: hidden; border-radius: 99px; background: #e8f2ee; }
+    .progress-fill { width: 0; height: 100%; border-radius: inherit; background: var(--green); transition: width .3s; }
+    .prompt { margin: 0 0 14px; color: var(--muted); font-size: 1.05rem; font-weight: 750; }
+    .sentence-card { display: grid; min-height: 138px; place-items: center; margin-bottom: 18px; padding: clamp(18px, 5vw, 30px); border: 2px solid #d6eef8; border-radius: 22px; background: linear-gradient(145deg, #f0f9ff, #f6fffb); }
+    .sentence { margin: 0; font-size: clamp(1.25rem, 5vw, 2rem); font-weight: 720; line-height: 1.55; }
+    .sentence strong { padding: 0 .12em; border-radius: 6px; color: #087f5b; background: #d1fae5; box-decoration-break: clone; -webkit-box-decoration-break: clone; font-weight: 950; text-decoration: underline; text-decoration-color: #10b981; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+    .answers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+    .answer {
+      display: flex; align-items: center; gap: 9px; min-height: 54px; padding: 9px 11px;
+      border: 2px solid #d9eee5; border-radius: 15px; color: var(--ink); background: #fff;
+      font-weight: 760; text-align: left; cursor: pointer; transition: transform .12s, border-color .12s, background .12s;
+    }
+    .answer:hover:not(:disabled) { transform: translateY(-2px); border-color: #6ee7b7; background: #f0fdf4; }
+    .answer:disabled { cursor: default; opacity: .56; }
+    .answer-number { display: grid; width: 29px; height: 29px; flex: 0 0 auto; place-items: center; border-radius: 10px; color: #087f5b; background: #d1fae5; font-size: .85rem; font-weight: 900; }
+    .answer.correct { border-color: var(--green); background: #ecfdf5; }
+    .answer.correct .answer-number { color: #fff; background: var(--green-dark); }
+    .error { min-height: 1.5em; margin: 12px 0 -6px; color: #be123c; font-weight: 750; }
+    .feedback { margin-top: 18px; padding: 17px; border-radius: 19px; background: #fffdf6; }
+    .feedback-title { margin: 0 0 7px; font-size: 1.5rem; font-weight: 900; }
+    .good { color: var(--green-dark); }
+    .bad { color: var(--red); }
+    .solution { margin: 0; line-height: 1.55; }
+    .score { margin: 8px 0; font-size: clamp(1.35rem, 5vw, 1.9rem); font-weight: 950; }
+    .encouragement { color: var(--muted); font-size: 1.05rem; line-height: 1.5; }
+    #confetti { position: fixed; inset: 0; z-index: 10; width: 100%; height: 100%; pointer-events: none; }
+    .footer-note { margin: 14px 0 0; color: #76908a; font-size: .78rem; text-align: center; line-height: 1.5; }
+    :focus-visible { outline: 3px solid #0ea5e9; outline-offset: 3px; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @media (min-width: 680px) {
+      .answers { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div class="app">
+    <header class="topbar">
+      <svg class="logo" viewBox="0 0 120 120" role="img" aria-label="Kočka Kiki">
+        <path d="M20 49 16 14l30 22q14-7 28 0l30-22-4 36q11 13 7 31-7 25-47 25T13 80q-4-18 7-31z" fill="#d1d5db"/>
+        <path d="m27 37-2-15 15 12zm66 0 2-15-15 12z" fill="#f9a8d4"/>
+        <ellipse cx="43" cy="60" rx="4" ry="6" fill="#243b53"/><ellipse cx="77" cy="60" rx="4" ry="6" fill="#243b53"/>
+        <path d="m56 72 4-3 4 3-4 4z" fill="#fb7185"/><path d="M60 76q-6 7-12 2m12-2q6 7 12 2" fill="none" stroke="#34495e" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <span>Slovní druhy s kočkou Kiki</span>
+    </header>
+
+    <main>
+      <section class="screen" id="setup-screen" aria-labelledby="welcome-title">
+        <svg class="cat" viewBox="0 0 180 150" role="img" aria-label="Veselá kočka Kiki">
+          <path d="M35 60 29 14l39 27q22-9 44 0l39-27-6 48q13 16 8 42-9 37-74 37-63 0-72-37-5-26 8-44z" fill="#d1d5db"/>
+          <path d="m43 43-3-20 19 15zM137 43l3-20-19 15z" fill="#fbcfe8"/>
+          <ellipse cx="66" cy="75" rx="5" ry="8" fill="#243b53"/><ellipse cx="114" cy="75" rx="5" ry="8" fill="#243b53"/>
+          <path d="m84 92 6-5 6 5-6 5z" fill="#fb7185"/><path d="M90 97q-8 9-17 2m17-2q8 9 17 2" fill="none" stroke="#34495e" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <h1 id="welcome-title">Poznáš slovní druhy?</h1>
+        <p class="lead">Rozhodni, jaký slovní druh má zvýrazněné slovo právě v této větě. Pozor: stejné slovo může mít v jiné větě jiný slovní druh! Vždy vybíráš ze všech deseti možností.</p>
+        <p class="section-label">Kolik vět chceš procvičit?</p>
+        <div class="count-options" id="count-options" role="group" aria-label="Počet vět">
+          <button class="option" type="button" data-count="10" aria-pressed="true">10 vět</button>
+          <button class="option" type="button" data-count="15" aria-pressed="false">15 vět</button>
+          <button class="option" type="button" data-count="20" aria-pressed="false">20 vět</button>
+        </div>
+        <button class="primary" id="start-button" type="button">SPUSTIT PROCVIČOVÁNÍ</button>
+      </section>
+
+      <section class="screen" id="game-screen" aria-labelledby="round-label" hidden>
+        <p class="round" id="round-label" aria-live="polite"></p>
+        <div class="progress" role="progressbar" aria-label="Postup procvičováním" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><div class="progress-fill" id="progress-fill"></div></div>
+        <p class="prompt">Urči slovní druh zvýrazněného slova podle toho, jak je použito ve větě:</p>
+        <div class="sentence-card"><p class="sentence" id="sentence" aria-live="polite"></p></div>
+        <div class="answers" id="answers" role="group" aria-label="Vyber slovní druh"></div>
+        <p class="error" id="answer-error" aria-live="polite"></p>
+        <div class="feedback" id="feedback" aria-live="polite" hidden>
+          <p class="feedback-title" id="feedback-title"></p>
+          <p class="solution" id="solution"></p>
+          <button class="primary" id="next-button" type="button" hidden>DALŠÍ SLOVO ➔</button>
+        </div>
+      </section>
+
+      <section class="screen" id="result-screen" aria-labelledby="result-title" hidden>
+        <div id="result-cat"></div>
+        <h1 id="result-title"></h1>
+        <p class="score" id="result-score"></p>
+        <p class="encouragement" id="result-message"></p>
+        <button class="primary" id="again-button" type="button">HRÁT ZNOVU</button>
+      </section>
+    </main>
+    <p class="footer-note">Sleduj, jakou úlohu má zvýrazněné slovo právě v dané větě — některá slova mohou patřit k různým slovním druhům.</p>
+  </div>
+
+  <script>
+    "use strict";
+    (() => {
+      const types = [
+        "Podstatné jméno", "Přídavné jméno", "Zájmeno", "Číslovka", "Sloveso",
+        "Příslovce", "Předložka", "Spojka", "Částice", "Citoslovce"
+      ];
+      const words = [
+        { word: "rosa", sentence: "Ranní rosa pokryla trávu.", type: 0 },
+        { word: "hřiště", sentence: "Po obědě jsme šli na hřiště.", type: 0 },
+        { word: "klíče", sentence: "Na stole ležely klíče.", type: 0 },
+        { word: "obraz", sentence: "Sestra obdivovala starý obraz.", type: 0 },
+        { word: "zvon", sentence: "V dálce se náhle ozval zvon.", type: 0 },
+        { word: "příběh", sentence: "Dědeček nám vyprávěl napínavý příběh.", type: 0 },
+        { word: "ráno", sentence: "Chladné ráno nás zastihlo na cestě.", type: 0 },
+        { word: "Včerejší", sentence: "Včerejší zápas byl opravdu napínavý.", type: 1 },
+        { word: "skleněná", sentence: "Na polici stála skleněná váza.", type: 1 },
+        { word: "zasněžené", sentence: "V dálce se rýsovaly zasněžené vrcholky.", type: 1 },
+        { word: "náročnou", sentence: "Žáci společně vyřešili náročnou hádanku.", type: 1 },
+        { word: "voňavých", sentence: "Zahrada byla plná voňavých květin.", type: 1 },
+        { word: "poslední", sentence: "Poslední autobus odjel před chvílí.", type: 1 },
+        { word: "nejvyšší", sentence: "Sněžka je nejvyšší hora České republiky.", type: 1 },
+        { word: "Kdokoli", sentence: "Kdokoli se může přihlásit do soutěže.", type: 2 },
+        { word: "Nikdo", sentence: "Nikdo neznal správnou odpověď.", type: 2 },
+        { word: "tuhle", sentence: "Vezmi si tuhle knihu, prosím.", type: 2 },
+        { word: "Její", sentence: "Její mladší bratr hraje na klavír.", type: 2 },
+        { word: "Co", sentence: "Co leží pod lavicí?", type: 2 },
+        { word: "Všichni", sentence: "Všichni už odešli na hřiště.", type: 2 },
+        { word: "některé", sentence: "Některé z nich jsme už viděli.", type: 2 },
+        { word: "dvacet", sentence: "Do cíle doběhlo dvacet závodníků.", type: 3 },
+        { word: "třetí", sentence: "Naše družstvo skončilo třetí.", type: 3 },
+        { word: "troje", sentence: "Do krabice se vešly troje boty.", type: 3 },
+        { word: "dvou", sentence: "Po dvou hodinách jsme dorazili domů.", type: 3 },
+        { word: "Oba", sentence: "Oba kamarádi přišli včas.", type: 3 },
+        { word: "druhé", sentence: "Druhé družstvo doběhlo do cíle jako první.", type: 3 },
+        { word: "kolik", sentence: "Kolik dní zbývá do prázdnin?", type: 3 },
+        { word: "setmělo", sentence: "Když se setmělo, rozsvítili jsme lampu.", type: 4 },
+        { word: "zahlédli", sentence: "Z úkrytu jsme zahlédli vzácného ptáka.", type: 4 },
+        { word: "Přečetla", sentence: "Přečetla dopis a usmála se.", type: 4 },
+        { word: "nesmíme", sentence: "Na chodbě nesmíme běhat.", type: 4 },
+        { word: "dorazíš", sentence: "Až dorazíš domů, zavolej mi.", type: 4 },
+        { word: "rozbil", sentence: "Silný vítr rozbil staré okno.", type: 4 },
+        { word: "byste", sentence: "Mohli byste nám s úkolem pomoci?", type: 4 },
+        { word: "brzy", sentence: "Přestože pršelo, vyrazili jsme brzy.", type: 5 },
+        { word: "kolem", sentence: "Rozhlédl se kolem, ale nikoho neviděl.", type: 5 },
+        { word: "ráno", sentence: "Ráno jsme vyrazili na dlouhý výlet.", type: 5 },
+        { word: "téměř", sentence: "Do cíle jsme dorazili téměř současně.", type: 5 },
+        { word: "vysoko", sentence: "Nad lesem kroužil vysoko orel.", type: 5 },
+        { word: "naproti", sentence: "Babička bydlela naproti přes ulici.", type: 5 },
+        { word: "včera", sentence: "Včera jsme navštívili městské muzeum.", type: 5 },
+        { word: "kolem", sentence: "Prošli jsme kolem starého mlýna.", type: 6 },
+        { word: "kvůli", sentence: "Kvůli opravě zavřeli most.", type: 6 },
+        { word: "během", sentence: "Během přestávky jsme hráli šachy.", type: 6 },
+        { word: "před", sentence: "Před školou čekal školní autobus.", type: 6 },
+        { word: "navzdory", sentence: "Navzdory dešti pokračovali ve výletě.", type: 6 },
+        { word: "blízko", sentence: "Blízko řeky rostou vysoké topoly.", type: 6 },
+        { word: "bez", sentence: "Bez mapy jsme cestu nenašli.", type: 6 },
+        { word: "protože", sentence: "Zůstali jsme doma, protože hustě sněžilo.", type: 7 },
+        { word: "nebo", sentence: "Můžeš si vybrat čaj nebo kakao.", type: 7 },
+        { word: "aby", sentence: "Zavřeli jsme okno, aby dovnitř nepršelo.", type: 7 },
+        { word: "Zatímco", sentence: "Zatímco bratr četl, sestra kreslila.", type: 7 },
+        { word: "ačkoli", sentence: "Ačkoli byl unavený, úkol dokončil.", type: 7 },
+        { word: "nejenže", sentence: "Nejenže uklidil pokoj, ale také umyl nádobí.", type: 7 },
+        { word: "jestliže", sentence: "Jestliže bude hezky, půjdeme k řece.", type: 7 },
+        { word: "Kéž", sentence: "Kéž by se nám výlet vydařil!", type: 8 },
+        { word: "Prý", sentence: "Prý už naši hosté dorazili.", type: 8 },
+        { word: "Snad", sentence: "Snad na nás kamarádi nezapomněli.", type: 8 },
+        { word: "Ať", sentence: "Ať se ti dnešní závod povede!", type: 8 },
+        { word: "Copak", sentence: "Copak jsi zapomněl klíče doma?", type: 8 },
+        { word: "Jen", sentence: "Jen ať už konečně zazvoní!", type: 8 },
+        { word: "Jé", sentence: "Jé, to je ale krásný výhled!", type: 9 },
+        { word: "Au", sentence: "Au, píchla jsem se o trn.", type: 9 },
+        { word: "Prásk", sentence: "Prásk! Dveře se prudce zabouchly.", type: 9 },
+        { word: "Haló", sentence: "Haló, je někdo doma?", type: 9 },
+        { word: "Fuj", sentence: "Fuj, ten sýr opravdu zapáchá!", type: 9 },
+        { word: "Cink", sentence: "Cink! Hodiny právě odbily poledne.", type: 9 },
+        { word: "Hurá", sentence: "Hurá, konečně začaly prázdniny!", type: 9 }
+      ];
+      const state = { total: 10, round: 0, firstTry: 0, attempts: 0, questions: [], confettiFrame: 0 };
+      const byId = (id) => document.getElementById(id);
+      const setupScreen = byId("setup-screen");
+      const gameScreen = byId("game-screen");
+      const resultScreen = byId("result-screen");
+      const answers = byId("answers");
+      const feedback = byId("feedback");
+      const answerError = byId("answer-error");
+
+      function renderQuestion() {
+        const question = state.questions[state.round];
+        byId("round-label").textContent = `Věta: ${state.round + 1} / ${state.total}`;
+        const progress = document.querySelector(".progress");
+        progress.setAttribute("aria-valuemax", String(state.total));
+        progress.setAttribute("aria-valuenow", String(state.round));
+        byId("progress-fill").style.width = `${state.round / state.total * 100}%`;
+        const sentence = byId("sentence");
+        const sentenceLower = question.sentence.toLocaleLowerCase("cs");
+        const wordLower = question.word.toLocaleLowerCase("cs");
+        const targetStart = sentenceLower.indexOf(wordLower);
+        if (targetStart < 0) throw new Error(`Ve větě chybí procvičované slovo „${question.word}“.`);
+        sentence.replaceChildren(
+          document.createTextNode(question.sentence.slice(0, targetStart)),
+          Object.assign(document.createElement("strong"), {
+            textContent: question.sentence.slice(targetStart, targetStart + question.word.length)
+          }),
+          document.createTextNode(question.sentence.slice(targetStart + question.word.length))
+        );
+        answers.replaceChildren();
+        types.forEach((type, index) => {
+          const button = document.createElement("button");
+          button.className = "answer";
+          button.type = "button";
+          button.dataset.type = String(index);
+          button.setAttribute("aria-label", `${index + 1}. ${type}`);
+          const number = document.createElement("span");
+          number.className = "answer-number";
+          number.textContent = String(index + 1);
+          const label = document.createElement("span");
+          label.textContent = type;
+          button.append(number, label);
+          answers.append(button);
+        });
+        answerError.textContent = "";
+        feedback.hidden = true;
+        byId("next-button").hidden = true;
+        state.attempts = 0;
+      }
+
+      function startGame() {
+        if (words.length < state.total) throw new Error("V sadě není dost vět pro zvolené kolo.");
+        const shuffledByType = types.map((_, type) => words.filter((item) => item.type === type));
+        for (const group of shuffledByType) {
+          for (let index = group.length - 1; index > 0; index--) {
+            const other = Math.floor(Math.random() * (index + 1));
+            [group[index], group[other]] = [group[other], group[index]];
+          }
+        }
+        state.questions = [];
+        while (state.questions.length < state.total) {
+          for (const group of shuffledByType) {
+            if (group.length && state.questions.length < state.total) state.questions.push(group.pop());
+          }
+        }
+        for (let index = state.questions.length - 1; index > 0; index--) {
+          const other = Math.floor(Math.random() * (index + 1));
+          [state.questions[index], state.questions[other]] = [state.questions[other], state.questions[index]];
+        }
+        state.round = 0;
+        state.firstTry = 0;
+        state.attempts = 0;
+        setupScreen.hidden = true;
+        resultScreen.hidden = true;
+        gameScreen.hidden = false;
+        renderQuestion();
+      }
+
+      function catSvg(happy) {
+        return `<svg class="cat" viewBox="0 0 180 150" role="img" aria-label="${happy ? "Veselá kočka Kiki" : "Kočka Kiki"}">
+          <path d="M35 60 29 14l39 27q22-9 44 0l39-27-6 48q13 16 8 42-9 37-74 37-63 0-72-37-5-26 8-44z" fill="#d1d5db"/>
+          <path d="m43 43-3-20 19 15zM137 43l3-20-19 15z" fill="#fbcfe8"/>
+          <ellipse cx="66" cy="75" rx="5" ry="8" fill="#243b53"/><ellipse cx="114" cy="75" rx="5" ry="8" fill="#243b53"/>
+          <path d="m84 92 6-5 6 5-6 5z" fill="#fb7185"/>
+          <path d="M90 97q-8 9-17 2m17-2q8 9 17 2" fill="none" stroke="#34495e" stroke-width="3" stroke-linecap="round"/>
+          ${happy ? '<path d="m21 57 9 6m120-6-9 6" stroke="#10b981" stroke-width="5" stroke-linecap="round"/>' : ""}
+        </svg>`;
+      }
+
+      function showConfetti() {
+        const canvas = byId("confetti");
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        const colors = ["#10b981", "#38bdf8", "#fbbf24", "#fb7185", "#a78bfa"];
+        const pieces = Array.from({ length: 100 }, () => ({
+          x: Math.random() * innerWidth,
+          y: -20 - Math.random() * innerHeight,
+          size: 5 + Math.random() * 7,
+          speed: 2 + Math.random() * 4,
+          drift: (Math.random() - 0.5) * 2,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          angle: Math.random() * 6.28
+        }));
+        cancelAnimationFrame(state.confettiFrame);
+        let frame = 0;
+        function animate() {
+          context.clearRect(0, 0, innerWidth, innerHeight);
+          for (const piece of pieces) {
+            piece.y += piece.speed;
+            piece.x += piece.drift;
+            piece.angle += .06;
+            context.save();
+            context.translate(piece.x, piece.y);
+            context.rotate(piece.angle);
+            context.fillStyle = piece.color;
+            context.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size * .65);
+            context.restore();
+          }
+          frame++;
+          if (frame < 120) state.confettiFrame = requestAnimationFrame(animate);
+          else context.clearRect(0, 0, innerWidth, innerHeight);
+        }
+        state.confettiFrame = requestAnimationFrame(animate);
+      }
+
+      function showResults() {
+        gameScreen.hidden = true;
+        resultScreen.hidden = false;
+        const percentage = Math.round(state.firstTry / state.total * 100);
+        byId("result-title").textContent = percentage >= 70 ? "Paráda, slovní druhy ti jdou!" : "Skvělá práce, procvičování pomáhá!";
+        byId("result-cat").innerHTML = catSvg(percentage >= 70);
+        byId("result-score").textContent = `Na první pokus: ${state.firstTry} z ${state.total} · ${percentage} %`;
+        byId("result-message").textContent = percentage >= 70
+          ? "Kiki má radost! Jen tak dál a slovní druhy budeš znát jako své tlapky."
+          : "Nevadí, každým kolem se zlepšuješ. Zkus si zahrát ještě jednou!";
+        if (percentage >= 70) showConfetti();
+        byId("again-button").focus({ preventScroll: true });
+      }
+
+      document.querySelectorAll("#count-options button").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.total = Number(button.dataset.count);
+          document.querySelectorAll("#count-options button").forEach((option) => {
+            option.setAttribute("aria-pressed", String(option === button));
+          });
+        });
+      });
+      byId("start-button").addEventListener("click", startGame);
+
+      answers.addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-type]");
+        if (!button || button.disabled) return;
+        const question = state.questions[state.round];
+        const correct = Number(button.dataset.type) === question.type;
+        state.attempts++;
+        feedback.hidden = false;
+        const title = byId("feedback-title");
+        title.textContent = correct ? "Správně!" : state.attempts === 1 ? "Zkus to ještě jednou!" : "Tady je správná odpověď.";
+        title.className = `feedback-title ${correct ? "good" : "bad"}`;
+        byId("solution").textContent = correct
+          ? `Slovo „${question.word}“ je v této větě ${types[question.type].toLocaleLowerCase("cs")}.`
+          : state.attempts === 1
+            ? "To nevadí! Zkus vybrat jiný slovní druh."
+            : `Slovo „${question.word}“ je v této větě ${types[question.type].toLocaleLowerCase("cs")}.`;
+        if (correct) {
+          button.classList.add("correct");
+          if (state.attempts === 1) state.firstTry++;
+        } else {
+          button.disabled = true;
+        }
+        const finished = correct || state.attempts === 2;
+        if (finished) {
+          for (const option of answers.querySelectorAll("button")) {
+            option.disabled = true;
+            if (Number(option.dataset.type) === question.type) option.classList.add("correct");
+          }
+          byId("next-button").hidden = false;
+          byId("next-button").focus({ preventScroll: true });
+        }
+      });
+
+      byId("next-button").addEventListener("click", () => {
+        state.round++;
+        if (state.round >= state.total) showResults();
+        else renderQuestion();
+      });
+      byId("again-button").addEventListener("click", () => {
+        resultScreen.hidden = true;
+        setupScreen.hidden = false;
+        byId("start-button").focus({ preventScroll: true });
+      });
+      window.addEventListener("resize", () => {
+        const canvas = byId("confetti");
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = Math.round(innerWidth * ratio);
+        canvas.height = Math.round(innerHeight * ratio);
+        canvas.getContext("2d").setTransform(ratio, 0, 0, ratio, 0, 0);
+      });
+    })();
+  </script>
+</body>
+</html>
