@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <meta name="description" content="Offline procvičování násobení a dělení s koalou Kiki.">
+  <title>Násobilka s koalou Kiki</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --green: #10b981;
+      --green-dark: #087f5b;
+      --green-pale: #d1fae5;
+      --blue-pale: #e0f2fe;
+      --ink: #193b37;
+      --muted: #637a76;
+      --red: #e11d48;
+      --shadow: 0 12px 32px #1c5a4b1c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: max(14px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+      color: var(--ink);
+      background: radial-gradient(ellipse at 8% 8%, var(--green-pale), transparent 24rem),
+        radial-gradient(ellipse at 95% 35%, var(--blue-pale), transparent 28rem), #f5fbf8;
+      font-family: ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+    }
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    .app { width: min(100%, 720px); margin: 0 auto; }
+    .topbar { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 2px 0 16px; font-size: clamp(1.1rem, 4vw, 1.45rem); font-weight: 900; letter-spacing: -.035em; }
+    .logo { width: 48px; height: 48px; flex: 0 0 auto; }
+    .screen { padding: clamp(20px, 5vw, 38px); border: 1px solid #10b98122; border-radius: 28px; background: #ffffffef; box-shadow: var(--shadow); text-align: center; animation: arrive .3s ease both; }
+    .screen[hidden], [hidden] { display: none !important; }
+    h1, h2, p { margin-top: 0; }
+    h1 { margin-bottom: 8px; font-size: clamp(1.65rem, 6vw, 2.45rem); line-height: 1.1; }
+    .lead { max-width: 38rem; margin: 0 auto 18px; color: var(--muted); font-size: 1.04rem; line-height: 1.55; }
+    .welcome-koala { display: block; width: min(230px, 65vw); height: 220px; margin: 0 auto 8px; }
+    .section-label { margin: 22px 0 10px; font-weight: 850; }
+    .choice-list { display: grid; gap: 10px; }
+    .choice { min-height: 56px; padding: 12px 16px; border: 2px solid #d9eee5; border-radius: 18px; color: var(--ink); background: #fff; font-weight: 750; cursor: pointer; transition: transform .15s, border-color .15s, background .15s; }
+    .choice:hover { transform: translateY(-2px); border-color: #6ee7b7; }
+    .choice[aria-pressed="true"] { border-color: var(--green); background: #ecfdf5; box-shadow: 0 0 0 3px var(--green-pale); }
+    .count-options { display: flex; justify-content: center; gap: 10px; }
+    .count-options .choice { min-width: 76px; }
+    .primary { width: 100%; min-height: 58px; margin-top: 24px; padding: 14px 20px; border: 0; border-radius: 18px; color: white; background: var(--green); box-shadow: 0 7px 0 #079669; font-size: 1.05rem; font-weight: 900; letter-spacing: .035em; cursor: pointer; transition: transform .12s, box-shadow .12s, background .12s; }
+    .primary:hover { background: #0dab78; }
+    .primary:active { transform: translateY(4px); box-shadow: 0 3px 0 #079669; }
+    .progress-wrap { margin-bottom: 22px; }
+    .round { margin: 0 0 9px; color: var(--muted); font-weight: 800; }
+    .progress { height: 12px; overflow: hidden; border-radius: 99px; background: #e8f2ee; }
+    .progress-fill { width: 0; height: 100%; border-radius: inherit; background: var(--green); transition: width .3s; }
+    .problem-card { margin: 0 0 20px; padding: clamp(20px, 7vw, 34px) 14px; border: 2px solid #d8f0e5; border-radius: 22px; background: linear-gradient(145deg, #f0fdf7, #eff8ff); }
+    .operation-label { margin: 0 0 8px; color: var(--green-dark); font-size: .9rem; font-weight: 850; text-transform: uppercase; letter-spacing: .06em; }
+    .problem-prompt { margin: 0; font-size: clamp(2rem, 10vw, 3.5rem); font-weight: 950; letter-spacing: -.04em; }
+    .answer-field { display: grid; gap: 7px; width: min(100%, 220px); margin: 0 auto; color: var(--muted); font-size: .92rem; font-weight: 750; text-align: left; }
+    .answer-field input { width: 100%; min-height: 62px; padding: 10px 14px; border: 2px solid #cfe8dd; border-radius: 16px; outline: none; color: var(--ink); background: #fff; font-size: 1.6rem; font-weight: 850; text-align: center; }
+    .answer-field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-pale); }
+    .error { min-height: 1.5em; margin: 10px 0 -8px; color: #be123c; font-weight: 750; }
+    .feedback { margin-top: 22px; padding: 18px; border-radius: 22px; background: #fffdf6; }
+    .feedback-koala, .final-koala { display: block; width: min(200px, 60vw); height: 190px; margin: 0 auto; }
+    .feedback-title { margin: 4px 0 8px; font-size: 1.8rem; font-weight: 950; }
+    .good { color: var(--green-dark); }
+    .bad { color: var(--red); }
+    .solution { margin: 0; line-height: 1.6; }
+    .final-title { margin-bottom: 10px; }
+    .score { margin: 8px 0; font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 950; }
+    .encouragement { color: var(--muted); font-size: 1.08rem; line-height: 1.5; }
+    .result-wrap { position: relative; }
+    .music-note { position: absolute; z-index: 1; color: #f59e0b; font-size: 1.8rem; pointer-events: none; animation: float-note 2s ease-in-out infinite; }
+    .music-note.one { top: 12%; left: 12%; }
+    .music-note.two { top: 28%; right: 10%; animation-delay: .6s; }
+    .music-note.three { bottom: 30%; left: 9%; animation-delay: 1s; }
+    .dancing { animation: dance .7s ease-in-out infinite alternate; transform-origin: 50% 90%; }
+    .dancing .arm { transform-box: fill-box; transform-origin: center; animation: wave .36s ease-in-out infinite alternate; }
+    .dancing .ear { transform-box: fill-box; transform-origin: bottom center; animation: ear-flap .45s ease-in-out infinite alternate; }
+    #confetti { position: fixed; inset: 0; z-index: 10; width: 100%; height: 100%; pointer-events: none; }
+    .footer-note { margin: 16px 0 0; color: #76908a; font-size: .82rem; text-align: center; }
+    :focus-visible { outline: 3px solid #0ea5e9; outline-offset: 3px; }
+    @keyframes arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes dance { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-14px) rotate(4deg); } }
+    @keyframes wave { from { transform: rotate(-15deg); } to { transform: rotate(35deg); } }
+    @keyframes ear-flap { from { transform: rotate(-8deg); } to { transform: rotate(12deg); } }
+    @keyframes float-note { 50% { transform: translateY(-12px) rotate(12deg); } }
+    @media (min-width: 620px) { .choice-list { grid-template-columns: repeat(3, 1fr); } .choice-list .choice { min-height: 100px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div class="app">
+    <header class="topbar">
+      <svg class="logo" viewBox="0 0 120 120" role="img" aria-label="Koala">
+        <circle cx="60" cy="61" r="48" fill="#d1d5db"/>
+        <circle cx="25" cy="29" r="22" fill="#aeb8c2"/><circle cx="25" cy="29" r="12" fill="#fbcfe8"/>
+        <circle cx="95" cy="29" r="22" fill="#aeb8c2"/><circle cx="95" cy="29" r="12" fill="#fbcfe8"/>
+        <ellipse cx="44" cy="58" rx="5" ry="7" fill="#243b53"/><ellipse cx="76" cy="58" rx="5" ry="7" fill="#243b53"/>
+        <ellipse cx="60" cy="72" rx="11" ry="15" fill="#34495e"/><path d="M51 88q9 10 18 0" fill="none" stroke="#34495e" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="34" cy="73" r="7" fill="#fda4af"/><circle cx="86" cy="73" r="7" fill="#fda4af"/>
+      </svg>
+      <span>Násobilka s koalou</span>
+    </header>
+    <main>
+      <section class="screen" id="setup-screen" aria-labelledby="welcome-title">
+        <svg class="welcome-koala" viewBox="0 0 240 240" role="img" aria-label="Veselá koala vás zve ke hře">
+          <ellipse cx="120" cy="215" rx="70" ry="12" fill="#dff3e9"/>
+          <path d="M76 143q-7 23-5 58h99q2-35-7-58z" fill="#10b981"/>
+          <ellipse cx="119" cy="192" rx="24" ry="20" fill="#9ca3af"/>
+          <circle cx="57" cy="72" r="35" fill="#aeb8c2"/><circle cx="57" cy="72" r="20" fill="#fbcfe8"/>
+          <circle cx="183" cy="72" r="35" fill="#aeb8c2"/><circle cx="183" cy="72" r="20" fill="#fbcfe8"/>
+          <ellipse cx="120" cy="100" rx="68" ry="65" fill="#d1d5db"/>
+          <path d="M92 91q9-13 18 0M131 91q9-13 18 0" fill="none" stroke="#34495e" stroke-width="5" stroke-linecap="round"/>
+          <ellipse cx="120" cy="111" rx="16" ry="22" fill="#34495e"/>
+          <path d="M108 134q12 14 24 0" fill="none" stroke="#34495e" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="79" cy="119" r="10" fill="#fda4af" opacity=".75"/><circle cx="161" cy="119" r="10" fill="#fda4af" opacity=".75"/>
+          <path d="M80 155q-31-22-40-3l28 30M160 155q31-22 40-3l-28 30" fill="#aeb8c2" stroke="#98a4ae" stroke-width="3" stroke-linecap="round"/>
+          <path d="M89 212v10m61-10v10" stroke="#34495e" stroke-width="8" stroke-linecap="round"/>
+          <path d="M34 38l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z" fill="#fbbf24"/>
+          <path d="M206 40l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z" fill="#6ee7b7"/>
+        </svg>
+        <h1 id="welcome-title">Ahoj, matematici!</h1>
+        <p class="lead">Já jsem Kiki. Procvičíme si spolu násobení i dělení — příklady se budou střídat!</p>
+        <p class="section-label">Vyber si obtížnost</p>
+        <div class="choice-list" id="level-options" role="group" aria-label="Obtížnost">
+          <button class="choice" type="button" data-level="basic" aria-pressed="true">Základní<br><small>Násobilka do 10 × 10</small></button>
+          <button class="choice" type="button" data-level="advanced" aria-pressed="false">Pokročilá<br><small>Činitelé do 20, výsledek do 100</small></button>
+          <button class="choice" type="button" data-level="master" aria-pressed="false">Mistr<br><small>Násobilka do 20 × 20</small></button>
+        </div>
+        <p class="section-label">Kolik příkladů si dáme?</p>
+        <div class="count-options" id="count-options" role="group" aria-label="Počet příkladů">
+          <button class="choice" type="button" data-count="5" aria-pressed="false">5</button>
+          <button class="choice" type="button" data-count="10" aria-pressed="true">10</button>
+          <button class="choice" type="button" data-count="15" aria-pressed="false">15</button>
+        </div>
+        <button class="primary" id="start-button" type="button">SPUSTIT HRU</button>
+      </section>
+      <section class="screen" id="game-screen" aria-labelledby="round-label" hidden>
+        <div class="progress-wrap">
+          <p class="round" id="round-label" aria-live="polite"></p>
+          <div class="progress" role="progressbar" aria-label="Postup hrou" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+        <div class="problem-card">
+          <p class="operation-label" id="operation-label"></p>
+          <p class="problem-prompt" id="problem-prompt"></p>
+        </div>
+        <form id="answer-form" novalidate>
+          <label class="answer-field" for="answer-input">Tvoje odpověď
+            <input id="answer-input" name="answer" type="number" inputmode="numeric" min="0" step="1" required autocomplete="off" aria-describedby="answer-error">
+          </label>
+          <p class="error" id="answer-error" aria-live="polite"></p>
+          <button class="primary" type="submit">ZKONTROLOVAT</button>
+        </form>
+        <div class="feedback" id="feedback" aria-live="polite" hidden>
+          <div id="feedback-koala"></div>
+          <p class="feedback-title" id="feedback-title"></p>
+          <p class="solution" id="solution"></p>
+          <button class="primary" id="next-button" type="button">DALŠÍ PŘÍKLAD ➔</button>
+        </div>
+      </section>
+      <section class="screen" id="result-screen" aria-labelledby="result-title" hidden>
+        <div class="result-wrap">
+          <div id="result-decoration"></div>
+          <div id="result-koala"></div>
+        </div>
+        <h1 class="final-title" id="result-title"></h1>
+        <p class="score" id="result-score"></p>
+        <p class="encouragement" id="result-message"></p>
+        <button class="primary" id="again-button" type="button">HRÁT ZNOVU</button>
+      </section>
+    </main>
+    <p class="footer-note">Tato samostatná stránka funguje bez internetu. 🐨</p>
+  </div>
+  <script>
+    "use strict";
+    (() => {
+      const byId = (id) => document.getElementById(id);
+      const state = { level: "basic", total: 10, round: 0, score: 0, problem: null, attempts: 0, firstOperation: "multiply", confettiFrame: 0 };
+      const setupScreen = byId("setup-screen");
+      const gameScreen = byId("game-screen");
+      const resultScreen = byId("result-screen");
+      const form = byId("answer-form");
+      const answerInput = byId("answer-input");
+      const answerError = byId("answer-error");
+      const feedback = byId("feedback");
+      const progress = document.querySelector(".progress");
+      const progressFill = byId("progress-fill");
+      const canvas = byId("confetti");
+      const context = canvas.getContext("2d");
+      const difficulty = {
+        basic: { min: 1, max: 10, maxProduct: 100 },
+        advanced: { min: 2, max: 20, maxProduct: 100 },
+        master: { min: 1, max: 20, maxProduct: 400 }
+      };
+
+      function makeProblem(operation) {
+        const { min, max, maxProduct } = difficulty[state.level];
+        let first;
+        let second;
+        do {
+          first = min + Math.floor(Math.random() * (max - min + 1));
+          second = min + Math.floor(Math.random() * (max - min + 1));
+        } while (first * second > maxProduct);
+        if (operation === "multiply") return { operation, first, second, answer: first * second };
+        const divisor = Math.random() < .5 ? first : second;
+        const quotient = divisor === first ? second : first;
+        return { operation, first: divisor * quotient, second: divisor, answer: quotient };
+      }
+
+      function makeKoala(mood, dancing = false) {
+        const smiling = mood === "happy";
+        const crying = mood === "sad";
+        const expression = smiling
+          ? '<path d="M102 116q18 20 36 0" fill="none" stroke="#34495e" stroke-width="5" stroke-linecap="round"/>'
+          : crying
+            ? '<path d="M103 130q17-18 34 0" fill="none" stroke="#34495e" stroke-width="5" stroke-linecap="round"/>'
+            : '<path d="M105 122q15 9 30 0" fill="none" stroke="#34495e" stroke-width="4" stroke-linecap="round"/>';
+        const arms = smiling
+          ? '<path class="arm" d="M66 151Q34 131 32 98l-3-20q-1-11 7-11t9 10l4 15q6-8 13-2l20 25M174 151q33-21 34-53l3-20q1-11-7-11t-9 10l-4 15q-6-8-13-2l-20 25"/>'
+          : crying
+            ? '<path class="arm" d="M66 151Q48 163 41 148l-8-22q-4-10 4-13t12 7l7 13 24-2M174 151q18 12 25-3l8-22q4-10-4-13t-12 7l-7 13-24-2"/>'
+            : '<path d="M67 153q-25-5-28-26M173 153q25-5 28-26"/>';
+        const thumb = smiling
+          ? '<path d="M31 70v-17q0-8 7-8t7 8v15" fill="#f5c8a8" stroke="#34495e" stroke-width="3" stroke-linejoin="round"/>'
+          : crying ? '<path d="M37 112l-8 14" stroke="#34495e" stroke-width="4" stroke-linecap="round"/>' : "";
+        return `<svg class="${dancing ? "final-koala dancing" : "feedback-koala"}" viewBox="0 0 240 220" role="img" aria-label="${smiling ? "Veselá koala s palcem nahoru" : crying ? "Smutná koala s palcem dolů" : "Koala"}">
+          <ellipse cx="120" cy="207" rx="62" ry="9" fill="#dff3e9"/>
+          <g fill="#aeb8c2" stroke="#8c9aa5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${arms}</g>${thumb}
+          <path d="M79 150q-5 19-4 50h90q1-30-6-50z" fill="#10b981"/>
+          <ellipse cx="120" cy="181" rx="22" ry="18" fill="#9ca3af"/>
+          <g class="ear"><circle cx="59" cy="59" r="34" fill="#aeb8c2"/><circle cx="59" cy="59" r="19" fill="#fbcfe8"/></g>
+          <g class="ear"><circle cx="181" cy="59" r="34" fill="#aeb8c2"/><circle cx="181" cy="59" r="19" fill="#fbcfe8"/></g>
+          <ellipse cx="120" cy="92" rx="65" ry="63" fill="#d1d5db"/>
+          ${crying ? '<ellipse cx="92" cy="94" rx="5" ry="8" fill="#34495e"/><ellipse cx="148" cy="94" rx="5" ry="8" fill="#34495e"/>' : '<circle cx="94" cy="93" r="5" fill="#34495e"/><circle cx="146" cy="93" r="5" fill="#34495e"/>'}
+          <ellipse cx="120" cy="108" rx="15" ry="20" fill="#34495e"/>${expression}
+          <circle cx="79" cy="116" r="9" fill="#fda4af" opacity=".75"/><circle cx="161" cy="116" r="9" fill="#fda4af" opacity=".75"/>
+          ${crying ? '<path d="M89 105q6 9 12 0" fill="none" stroke="#38bdf8" stroke-width="4" stroke-linecap="round"/>' : ""}
+          <path d="M97 198v9m46-9v9" stroke="#34495e" stroke-width="8" stroke-linecap="round"/>
+        </svg>`;
+      }
+
+      function renderQuestion() {
+        const operation = state.round % 2 === 0 ? state.firstOperation : state.firstOperation === "multiply" ? "divide" : "multiply";
+        const problem = makeProblem(operation);
+        state.problem = problem;
+        state.attempts = 0;
+        byId("round-label").textContent = `Kolo: ${state.round + 1} / ${state.total}`;
+        progress.setAttribute("aria-valuemax", String(state.total));
+        progress.setAttribute("aria-valuenow", String(state.round));
+        progressFill.style.width = `${state.round / state.total * 100}%`;
+        byId("operation-label").textContent = operation === "multiply" ? "Násobení" : "Dělení";
+        byId("problem-prompt").textContent = operation === "multiply"
+          ? `${problem.first} × ${problem.second} = ?`
+          : `${problem.first} : ${problem.second} = ?`;
+        answerInput.value = "";
+        answerError.textContent = "";
+        form.hidden = false;
+        feedback.hidden = true;
+        answerInput.focus({ preventScroll: true });
+      }
+
+      function startGame() {
+        state.round = 0;
+        state.score = 0;
+        state.firstOperation = Math.random() < .5 ? "multiply" : "divide";
+        setupScreen.hidden = true;
+        resultScreen.hidden = true;
+        gameScreen.hidden = false;
+        renderQuestion();
+      }
+
+      function showResults() {
+        gameScreen.hidden = true;
+        resultScreen.hidden = false;
+        const percentage = Math.round(state.score / state.total * 100);
+        const passed = percentage >= 70;
+        byId("result-decoration").innerHTML = passed
+          ? '<span class="music-note one" aria-hidden="true">♫</span><span class="music-note two" aria-hidden="true">♪</span><span class="music-note three" aria-hidden="true">♫</span>'
+          : "";
+        byId("result-koala").innerHTML = makeKoala(passed ? "happy" : "sad", passed);
+        byId("result-title").textContent = passed ? "Výborně! Koala tančí! 🐨💃" : "Nevadí, zkusíme to znovu!";
+        byId("result-score").textContent = `Skóre: ${state.score} z ${state.total} · ${percentage} %`;
+        byId("result-message").textContent = passed
+          ? "To byla parádní práce. Kiki má z tvého počítání obrovskou radost!"
+          : "Každý příklad tě posouvá dál. Matematika se tréninkem zlepšuje!";
+        if (passed) showConfetti();
+        byId("again-button").focus({ preventScroll: true });
+      }
+
+      function showConfetti() {
+        const colors = ["#10b981", "#38bdf8", "#fbbf24", "#fb7185", "#a78bfa"];
+        const pieces = Array.from({ length: 90 }, () => ({
+          x: Math.random() * window.innerWidth,
+          y: -20 - Math.random() * window.innerHeight * .35,
+          vx: (Math.random() - .5) * 4,
+          vy: 2 + Math.random() * 4,
+          size: 4 + Math.random() * 7,
+          angle: Math.random() * Math.PI,
+          spin: (Math.random() - .5) * .15,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        }));
+        cancelAnimationFrame(state.confettiFrame);
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = Math.round(window.innerWidth * ratio);
+        canvas.height = Math.round(window.innerHeight * ratio);
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        function draw() {
+          context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+          let remaining = false;
+          for (const piece of pieces) {
+            if (piece.y >= window.innerHeight + 30) continue;
+            remaining = true;
+            piece.x += piece.vx;
+            piece.y += piece.vy;
+            piece.angle += piece.spin;
+            context.save();
+            context.translate(piece.x, piece.y);
+            context.rotate(piece.angle);
+            context.fillStyle = piece.color;
+            context.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size * .65);
+            context.restore();
+          }
+          if (remaining) state.confettiFrame = requestAnimationFrame(draw);
+          else context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        }
+        state.confettiFrame = requestAnimationFrame(draw);
+      }
+
+      function setPressed(container, selected) {
+        for (const button of container.querySelectorAll("button")) {
+          button.setAttribute("aria-pressed", String(button === selected));
+        }
+      }
+
+      byId("level-options").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-level]");
+        if (!button) return;
+        state.level = button.dataset.level;
+        setPressed(byId("level-options"), button);
+      });
+
+      byId("count-options").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-count]");
+        if (!button) return;
+        state.total = Number(button.dataset.count);
+        setPressed(byId("count-options"), button);
+      });
+
+      byId("start-button").addEventListener("click", startGame);
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const value = answerInput.value.trim();
+        if (!/^\d+$/.test(value) || !Number.isSafeInteger(Number(value))) {
+          answerError.textContent = "Zadej prosím nezáporné celé číslo.";
+          answerInput.focus();
+          return;
+        }
+        answerError.textContent = "";
+        state.attempts++;
+        if (Number(value) === state.problem.answer) {
+          state.score++;
+          finishQuestion(true);
+        } else if (state.attempts === 1) {
+          answerError.textContent = "To nevadí, zkus to ještě jednou!";
+          answerInput.select();
+        } else {
+          finishQuestion(false);
+        }
+      });
+
+      function finishQuestion(correct) {
+        form.hidden = true;
+        feedback.hidden = false;
+        byId("feedback-koala").innerHTML = makeKoala(correct ? "happy" : "sad");
+        const title = byId("feedback-title");
+        title.textContent = correct ? "Výborně!" : "Aha, vedle!";
+        title.className = `feedback-title ${correct ? "good" : "bad"}`;
+        byId("solution").textContent = correct
+          ? "Správná odpověď! Jen tak dál!"
+          : `Správný výsledek je ${state.problem.answer}.`;
+        if (correct) {
+          showConfetti();
+          window.setTimeout(advanceQuestion, 900);
+        } else {
+          byId("next-button").focus({ preventScroll: true });
+        }
+      }
+
+      function advanceQuestion() {
+        state.round++;
+        if (state.round >= state.total) showResults();
+        else renderQuestion();
+      }
+
+      byId("next-button").addEventListener("click", advanceQuestion);
+
+      byId("again-button").addEventListener("click", () => {
+        cancelAnimationFrame(state.confettiFrame);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        resultScreen.hidden = true;
+        setupScreen.hidden = false;
+        byId("start-button").focus({ preventScroll: true });
+      });
+
+      window.addEventListener("resize", () => {
+        const ratio = window.devicePixelRatio || 1;
+        canvas.width = Math.round(window.innerWidth * ratio);
+        canvas.height = Math.round(window.innerHeight * ratio);
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      });
+    })();
+  </script>
+</body>
+</html>
